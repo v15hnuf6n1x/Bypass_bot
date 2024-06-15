@@ -197,25 +197,33 @@ def loopthread(message: Message, otherss=False):
 
 
 # start command
-@app.on_message(filters.command('start') & filters.private & subscribed)
+@app.on_message(filters.command('start') & filters.private)
 async def send_start(client: Client, message: Message):
-    id = message.from_user_id
+    id = message.from_user.id
+    # Assuming present_user and add_user are defined elsewhere
+    # Example placeholder functions for present_user and add_user
+    async def present_user(user_id):
+        # Your logic here
+        pass
+    async def add_user(user_id):
+        # Your logic here
+        pass
     if not await present_user(id):
         try:
             await add_user(id)
-        except:
-            pass
-    app.send_message(
+        except Exception as e:
+            print(f"Error adding user: {e}")
+    await app.send_message(
         message.chat.id,
-        f"__👋 Hi **{message.from_user.mention}**, I am Link Bypasser Bot, just send me any supported links and i will you get you results.\nCheckout /help to Read More__",
+        f"👋 Hi **{message.from_user.mention}**, I am Link Bypasser Bot. Just send me any supported links and I will get you results.\n\nCheck out /help to read more.",
         reply_markup=InlineKeyboardMarkup(
             [
-                [InlineKeyboardButton("🌐About",callback_data = "about",)],
-                [InlineKeyboardButton("🔔Updates",url="https://t.me/mr_v_bots",)],
-                [InlineKeyboardButton("Close",callback_data = "close")]
+                [InlineKeyboardButton("🌐 About", callback_data="about")],
+                [InlineKeyboardButton("🔔 Updates", url="https://t.me/mr_v_bots")],
+                [InlineKeyboardButton("Close", callback_data="close")],
             ]
         ),
-        await reply_to_message_id==message.id,
+        reply_to_message_id=message.message_id,  # Corrected this line
     )
 
 @app.on_callback_query()
