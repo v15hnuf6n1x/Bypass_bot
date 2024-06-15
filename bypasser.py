@@ -2261,26 +2261,30 @@ def mdiskpro(url):
 #####################################################################################################
 # tnshort
 
+def tnseries(url):
+    code = url.rstrip("/").split("/")[-1]
+    DOMAIN = "https://news.sagenews.in"
+    ref = "https://knowstuff.in/"
+    useragent = 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
 
-#def tnshort(url):
-#    client = cloudscraper.create_scraper(allow_brotli=False)
-#    DOMAIN = "https://go.tnshort.net/"
-#    url = url[:-1] if url[-1] == "/" else url
-#    code = url.split("/")[-1]
-#    final_url = f"{DOMAIN}/{code}"
-#    ref = "https://movies.djnonstopmusic.in/"
-#    h = {"referer": ref}
-#    resp = client.get(final_url, headers=h)
-#    soup = BeautifulSoup(resp.content, "html.parser")
-#    inputs = soup.find_all("input")
-#    data = {input.get("name"): input.get("value") for input in inputs}
-#    h = {"x-requested-with": "XMLHttpRequest"}
-#    time.sleep(8)
-#    r = client.post(f"{DOMAIN}/links/go", data=data, headers=h)
-#    try:
-#        return str(r.json()["url"])
-#    except BaseException:
-#        return "Something went wrong :("
+    with requests.Session() as session:
+        res = session.get(f"{DOMAIN}/{code}", headers={'Referer': ref, 'User-Agent': useragent})
+        html = res.text
+        cookies = res.cookies
+        
+        soup = BeautifulSoup(html, "html.parser")
+        title_tag = soup.find('title')
+        if title_tag and title_tag.text == 'Just a moment...':
+            return "Unable To Bypass Due To Cloudflare Protected"
+        else:
+            data = {inp.get('name'): inp.get('value') for inp in soup.find_all('input') if inp.get('name') and inp.get('value')}
+            sleep(5)
+            resp = session.post(f"{DOMAIN}/links/go", data=data, headers={'Referer': f"{DOMAIN}/{code}", 'X-Requested-With':'XMLHttpRequest', 'User-Agent': useragent}, cookies=cookies)
+            if 'application/json' in resp.headers.get('Content-Type'):
+                json_data = resp.json()
+                return json_data['url']
+            else:
+                return "Script is broken"
 
 #####################################################################################################
 
