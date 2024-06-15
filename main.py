@@ -8,6 +8,7 @@ from pyrogram.types import (
 from os import environ, remove
 from threading import Thread
 from json import load
+from database.database import add_user, del_user, full_userbase, present_user
 from re import search
 
 from texts import HELP_TEXT
