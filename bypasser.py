@@ -14,6 +14,8 @@ import ddl
 from cfscrape import create_scraper
 from json import load
 from os import environ
+import requests
+from time import sleep
 
 with open("config.json", "r") as f:
     DATA = load(f)
@@ -1145,30 +1147,23 @@ def dropbox(url):
 ######################################################
 # shareus
 
-
-def shareus(url):
-    headers = {
-        "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
-    }
-    DOMAIN = "https://us-central1-my-apps-server.cloudfunctions.net"
-    sess = requests.session()
-
-    code = url.split("/")[-1]
-    params = {
-        "shortid": code,
-        "initial": "true",
-        "referrer": "https://shareus.io/",
-    }
-    response = requests.get(f"{DOMAIN}/v", params=params, headers=headers)
-
-    for i in range(1, 4):
-        json_data = {
-            "current_page": i,
-        }
-        response = sess.post(f"{DOMAIN}/v", headers=headers, json=json_data)
-
-    response = sess.get(f"{DOMAIN}/get_link", headers=headers).json()
-    return response["link_info"]["destination"]
+async def shareus(url):
+    code = url.split('/')[-1]
+    DOMAIN = "https://api.shrslink.xyz"
+    headers = {'User-Agent':'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36', 'Origin':'https://shareus.io'}
+    api = f"{DOMAIN}/v?shortid={code}&initial=true&referrer="
+    async with ClientSession() as session:
+        async with session.get(api, headers=headers) as resp:
+            data = await resp.json()
+            id = data.get('sid')
+            if not id:
+                return "ID Error"
+            else:
+                api_2 = f"{DOMAIN}/get_link?sid={id}"
+                async with session.get(api_2, headers=headers) as resp_2:
+                    data_2 = await resp_2.json()
+                    final = data_2['link_info']['destination']
+                    return final
 
 
 #######################################################
@@ -1619,6 +1614,9 @@ def others(url):
 
 #################################################################################################################
 # ouo
+
+
+
 
 
 # RECAPTCHA v3 BYPASS
@@ -2236,31 +2234,56 @@ def mdiskpro(url):
     except:
         return "Something went wrong :("
 
-
 #####################################################################################################
 # tnshort
 
 
-def tnshort(url):
-    client = cloudscraper.create_scraper(allow_brotli=False)
-    DOMAIN = "https://go.tnshort.net/"
-    url = url[:-1] if url[-1] == "/" else url
-    code = url.split("/")[-1]
-    final_url = f"{DOMAIN}/{code}"
-    ref = "https://movies.djnonstopmusic.in/"
-    h = {"referer": ref}
-    resp = client.get(final_url, headers=h)
-    soup = BeautifulSoup(resp.content, "html.parser")
-    inputs = soup.find_all("input")
-    data = {input.get("name"): input.get("value") for input in inputs}
-    h = {"x-requested-with": "XMLHttpRequest"}
-    time.sleep(8)
-    r = client.post(f"{DOMAIN}/links/go", data=data, headers=h)
-    try:
-        return str(r.json()["url"])
-    except BaseException:
-        return "Something went wrong :("
+#def tnshort(url):
+#    client = cloudscraper.create_scraper(allow_brotli=False)
+#    DOMAIN = "https://go.tnshort.net/"
+#    url = url[:-1] if url[-1] == "/" else url
+#    code = url.split("/")[-1]
+#    final_url = f"{DOMAIN}/{code}"
+#    ref = "https://movies.djnonstopmusic.in/"
+#    h = {"referer": ref}
+#    resp = client.get(final_url, headers=h)
+#    soup = BeautifulSoup(resp.content, "html.parser")
+#    inputs = soup.find_all("input")
+#    data = {input.get("name"): input.get("value") for input in inputs}
+#    h = {"x-requested-with": "XMLHttpRequest"}
+#    time.sleep(8)
+#    r = client.post(f"{DOMAIN}/links/go", data=data, headers=h)
+#    try:
+#        return str(r.json()["url"])
+#    except BaseException:
+#        return "Something went wrong :("
 
+#####################################################################################################
+
+def tnshort(url):
+    code = url.rstrip("/").split("/")[-1]
+    DOMAIN = "https://news.sagenews.in"
+    ref = "https://knowstuff.in/"
+    useragent = 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
+
+    with requests.Session() as session:
+        res = session.get(f"{DOMAIN}/{code}", headers={'Referer': ref, 'User-Agent': useragent})
+        html = res.text
+        cookies = res.cookies
+        
+        soup = BeautifulSoup(html, "html.parser")
+        title_tag = soup.find('title')
+        if title_tag and title_tag.text == 'Just a moment...':
+            return "Unable To Bypass Due To Cloudflare Protected"
+        else:
+            data = {inp.get('name'): inp.get('value') for inp in soup.find_all('input') if inp.get('name') and inp.get('value')}
+            sleep(5)
+            resp = session.post(f"{DOMAIN}/links/go", data=data, headers={'Referer': f"{DOMAIN}/{code}", 'X-Requested-With':'XMLHttpRequest', 'User-Agent': useragent}, cookies=cookies)
+            if 'application/json' in resp.headers.get('Content-Type'):
+                json_data = resp.json()
+                return json_data['url']
+            else:
+                return "Script is broken"
 
 #####################################################################################################
 # tnvalue
@@ -2701,6 +2724,10 @@ def shortners(url):
     # tnshort
     elif "https://link.tnshort.net/" in url:
         print("entered tnshort:", url)
+        return tnshort(url)
+
+    elif "https://tnseries.com/" in url:
+        print("entered tnseries:", url)
         return tnshort(url)
 
     # tnvalue
