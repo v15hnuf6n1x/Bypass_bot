@@ -198,7 +198,7 @@ def loopthread(message: Message, otherss=False):
 
 # start command
 @app.on_message(filters.command('start') & filters.private & subscribed)
-asyncdef send_start(client: Client, message: Message):
+async def send_start(client: Client, message: Message):
     id = message.from_user_id
     if not await present_user(id):
         try:
