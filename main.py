@@ -10,7 +10,10 @@ from threading import Thread
 from json import load
 from database.database import add_user, del_user, full_userbase, present_user
 from re import search
-
+from pyrogram import filters
+from pyrogram.enums import ChatMemberStatus
+from config import FORCE_SUB_CHANNEL, ADMINS
+from pyrogram.errors.exceptions.bad_request_400 import UserNotParticipant
 from texts import HELP_TEXT
 import bypasser
 import freewall
@@ -40,10 +43,9 @@ with app:
     )
 
 # DB
-db_api = getenv("DB_API")
-db_owner = getenv("DB_OWNER")
+db_uri = getenv("DB_URI")
 db_name = getenv("DB_NAME")
-try: database = DB(api_key=db_api, db_owner=db_owner, db_name=db_name)
+try: database = DB(db_uri=db_owner, db_name=db_name)
 except: 
     print("Database is Not Set")
     database = None
