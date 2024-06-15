@@ -105,6 +105,8 @@ shortnertext = """__- igg-games \n\
 - mdiskpro \n\
 - tnshort \n\
 - indianshortner \n\
+- gtlinks \n\
+- tnseries \n\
 - rslinks \n\
 - bitly, tinyurl \n\
 - thinfi \n\
