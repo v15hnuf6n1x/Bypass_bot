@@ -193,37 +193,40 @@ def loopthread(message: Message, otherss=False):
 
 
 # start command
-@app.on_message(filters.command(["start"]))
-def send_start(
-    client: Client,
-    message: Message,
-):
+@app.on_message(filters.command('start') & filters.private & subscribed)
+asyncdef send_start(client: Client, message: Message):
+    id = message.from_user_id
+    if not await present_user(id):
+        try:
+            await add_user(id)
+        except:
+            pass
     app.send_message(
         message.chat.id,
-        f"__👋 Hi **{message.from_user.mention}**, i am Link Bypasser Bot, just send me any supported links and i will you get you results.\nCheckout /help to Read More__",
+        f"__👋 Hi **{message.from_user.mention}**, I am Link Bypasser Bot, just send me any supported links and i will you get you results.\nCheckout /help to Read More__",
         reply_markup=InlineKeyboardMarkup(
             [
-                [
-                    InlineKeyboardButton(
-                        "🌐 Source Code",
-                        url="https://github.com/bipinkrish/Link-Bypasser-Bot",
-                    )
-                ],
-                [
-                    InlineKeyboardButton(
-                        "Replit",
-                        url="https://replit.com/@bipinkrish/Link-Bypasser#app.py",
-                    )
-                ],
+                [InlineKeyboardButton("🌐About",callback_data = "about",)],
+                [InlineKeyboardButton("🔔Updates",url="https://t.me/mr_v_bots",)],
+                [InlineKeyboardButton("Close",callback_data = "close")]
             ]
         ),
-        reply_to_message_id=message.id,
+        await reply_to_message_id=message.id,
     )
 
+@app.on_callback_query()
+async def close_keyboard(client, callback_query):
+    if callback_query.data == "about":
+        await callback_query.message.edit_text(
+            text = f"<b>✑ Cʀᴇᴀᴛᴏʀ👨‍💻 :<a href='https://t.me/user?id={OWNER_ID}'>Tʜɪs Gᴜʏ</a>\n✑ Lᴀɴɢᴜᴀɢᴇ🗄 :<a>Pʏᴛʜᴏɴ</a>\n✑ Lɪʙʀᴀʀʏ🗃 : <a>Pʏʀᴏɢʀᴀᴍ</a>\n✑ Sᴏᴜʀᴄᴇ Cᴏᴅᴇ📄 : <a href='https://t.me/v15hnuf6n1x'>Gᴇᴛ Hᴇʀᴇ</a>\n✑ Dᴇᴠ🪛 : <a href='https://t.me/Mr_V_bots'>Mʀ.V Bᴏᴛs</a></b>",
+            disable_web_page_preview = True)
+    elif callback_query.data == "close":
+        await callback_query.message.edit_reply_markup(reply_markup=None)
+        await callback_query.message.delete()
 
 # help command
-@app.on_message(filters.command(["help"]))
-def send_help(
+@app.on_message(filters.command('help') & filters.private & subscribed)
+async def send_help(
     client: Client,
     message: Message,
 ):
@@ -236,7 +239,7 @@ def send_help(
 
 
 # links
-@app.on_message(filters.text)
+@app.on_message(filters.text & filters.private & subscribed)
 def receive(
     client: Client,
     message: Message,
