@@ -13,7 +13,7 @@ from re import search
 from pyrogram import filters
 from config import ADMINS, TOKEN, ID, HASH, DB_URL, DB_NAME
 from helper_func import subscribed, encode, decode, get_messages
-from database.database import add_user, del_user, full_userbase, present_user
+from database import add_user, del_user, full_userbase, present_user
 
 from texts import HELP_TEXT
 import bypasser
