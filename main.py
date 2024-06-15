@@ -215,7 +215,7 @@ async def send_start(client: Client, message: Message):
                 [InlineKeyboardButton("Close",callback_data = "close")]
             ]
         ),
-        await reply_to_message_id=message.id,
+        await reply_to_message_id==message.id,
     )
 
 @app.on_callback_query()
